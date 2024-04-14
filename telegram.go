@@ -15,6 +15,12 @@ type telegramPayload struct {
 	Text   string `json:"text"`
 }
 
+func sendTelegramMessage(message string) {
+	httpClient := http.Client{}
+	req := createTelegramSendMessageRequest("message")
+	httpClient.Do(req)
+}
+
 func createTelegramSendMessageRequest(message string) *http.Request {
 	telegramBotToken, exists := os.LookupEnv("TELEGRAM_BOT_TOKEN")
 	if !exists {
