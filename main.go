@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
-	"net/http/cookiejar"
 	"strconv"
 	"strings"
 	"time"
@@ -23,9 +21,6 @@ func main() {
 // var freeDaysRegex = regexp.MustCompile(`\d+ frei`)
 
 func poll() {
-	jar, _ := cookiejar.New(nil)
-	_ = &http.Client{Jar: jar}
-
 	pw, err := playwright.Run()
 	if err != nil {
 		log.Fatalf("could not start playwright: %v", err)
@@ -105,19 +100,23 @@ func poll() {
 		}
 
 		foundSomething = true
-		message := fmt.Sprintf("Am %s, den %s%s ist ein Termin Frei! Schnapp ihn dir: https://egov.potsdam.de/tnv/?START_OFFICE=buergerservice", weekday, dayInMonth, monthNumberWithSurroundingDots)
+		message := fmt.Sprintf("Am %s, den %s%s ist ein Termin frei! Schnapp ihn dir: https://egov.potsdam.de/tnv/?START_OFFICE=buergerservice", weekday, dayInMonth, monthNumberWithSurroundingDots)
+		if count > 1 {
+			message = fmt.Sprintf("Am %s, den %s%s sind %d Termine frei! Schnapp sie dir: https://egov.potsdam.de/tnv/?START_OFFICE=buergerservice", weekday, dayInMonth, monthNumberWithSurroundingDots, count)
+		}
 		sendTelegramMessage(message)
 	}
 
 	if !foundSomething {
 		log.Print("no appointments found")
+	} else {
+		log.Print("success! Found 1 or more appointments")
 	}
-}
 
-func sum(arr []int) int {
-	accumulator := 0
-	for _, num := range arr {
-		accumulator += num
+	if err = browser.Close(); err != nil {
+		log.Fatalf("could not close browser: %v", err)
 	}
-	return accumulator
+	if err = pw.Stop(); err != nil {
+		log.Fatalf("could not stop Playwright: %v", err)
+	}
 }
