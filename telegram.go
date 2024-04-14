@@ -17,7 +17,7 @@ type telegramPayload struct {
 
 func sendTelegramMessage(message string) {
 	httpClient := http.Client{}
-	req := createTelegramSendMessageRequest("message")
+	req := createTelegramSendMessageRequest(message)
 	httpClient.Do(req)
 }
 
